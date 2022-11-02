@@ -1,0 +1,88 @@
+---
+title: "Week4"
+output: html_document
+date: "2022-11-02"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(sp)
+library(sf)
+library(rgdal)
+library(tidyverse)
+library(tmap)
+library(tmaptools)
+library(here)
+library(janitor)
+```
+
+```{r}
+mycsv <- read_csv("C:/Users/Scott Shaw/Desktop/Week4/HDR21-22_Composite_indices_complete_time_series.csv")
+```
+
+```{r}
+gii_csv <- mycsv %>%
+  clean_names() %>%
+select(iso3, country, gii_2010, gii_2019)
+gii_csv
+```
+
+```{r}
+gii_country <- gii_csv %>%
+  slice(1:195) %>%
+  mutate(., gii_diff=(gii_2019-gii_2010))
+gii_country
+```
+
+```{r}
+gii_country_edit <- na.omit(gii_country)
+gii_country_edit
+```
+
+```{r}
+shape <- st_read("World Countries (Generalized)/World_Countries__Generalized_.shp")
+```
+
+```{r}
+summary(shape)
+```
+
+```{r}
+library(countrycode)
+```
+
+```{r}
+gii_country_edit$iso = countrycode(gii_country_edit$iso3,"iso3c","iso2c")
+```
+
+```{r}
+shape
+joined_data <- shape %>% 
+  clean_names() %>%
+  left_join(., 
+            gii_country_edit,
+            by = c("iso" = "iso"))
+```
+
+```{r}
+  tm_shape(joined_data) + 
+  tm_polygons("gii_diff", 
+              style="pretty",
+              palette="Blues",
+              midpoint=NA,
+              #title="Gender Inequality Difference between 2010 & 2019",
+              alpha = 0.7) + 
+  tm_compass(position = c("left", "bottom"),type = "arrow") + 
+  tm_scale_bar(position = c("left", "bottom")) +
+  tm_layout(title = "Gender Inequality Difference between 2010 & 2019", legend.position = c("right", "bottom")) +
+  tmap_options(max.categories = 115)
+```
