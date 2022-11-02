@@ -69,4 +69,16 @@ joined_data <- shape %>%
             gii_country_edit,
             by = c("iso" = "iso"))
 ```
-
+```{r}
+ tm_shape(joined_data) + 
+  tm_polygons("gii_diff", 
+              style="pretty",
+              palette="Blues",
+              midpoint=NA,
+              #title="Gender Inequality Difference between 2010 & 2019",
+              alpha = 0.7) + 
+  tm_compass(position = c("left", "bottom"),type = "arrow") + 
+  tm_scale_bar(position = c("left", "bottom")) +
+  tm_layout(title = "Gender Inequality Difference between 2010 & 2019", legend.position = c("right", "bottom")) +
+  tmap_options(max.categories = 115)
+```
